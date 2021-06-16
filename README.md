@@ -14,15 +14,13 @@ WinAppleKey is implemented as a HIDCLASS LowerFilter WDM kernel mode driver.
 
 ### Installation
 
-**DISCLAIMER:** This driver is signed with a self-signed (test/development) certificate. For that reason, Windows will not directly allow the driver installation unless in **TESTSIGNING** mode. Please be aware that permanently running Windows in **TESTSIGNING** mode leaves your system open to potential security risks; so please be aware of what you are doing as any consequence because of this is solely your responsibility. WinAppleKey is ***free software*** that you are willing to build and/or use completely ***at your own risk.***
-
-**NOTE:** If your system is running a UEFI BIOS, you will need to disable **Secure Boot** through your BIOS first.
+**DISCLAIMER:** This driver is signed with a self-signed (test/development) certificate. For that reason, Windows will not allow the driver installation unless running in **TESTSIGNING** mode. Please be aware that permanently running Windows in **TESTSIGNING** mode leaves your system open to potential security risks. Any consequence because of this is solely your own responsibility. WinAppleKey is ***free software*** that you are willing to build and/or use completely ***at your own risk.*** If your system is running a UEFI BIOS with **Secure Boot** enabled, you will need to disable **Secure Boot** in BIOS first before enabling **TESTSIGNING** mode.
 
 To switch to **TESTSIGNING** mode issue the following command (in an Administrative command prompt) and then reboot your PC: 
 
 ``` bcdedit.exe -set TESTSIGNING ON ```
 
-You can now run the Setup.msi installer.
+You can now run the *Setup.msi* installer.
 
 To uninstall, run the uninstaller from the ```Control Panel``` ```Programs``` and then manually revert TESTSIGNING mode by issuing the following command (in an Administrative command prompt):
 
@@ -117,6 +115,10 @@ See paragraph **Multimedia Keys** above.
 #### 3. When running in the default fn-ctrl swap mode, the ctrl-lshift-t combination commonly used to reopen a closed browser tab in Chrome does not work.
 
 This is an issue of the Apple keyboard hardware rather than the driver. You can use the ctrl-rshift-t combination instead.
+
+#### 4. I am trying to enable Test Signing mode but I get this error: ```The value is protected by Secure Boot policy and cannot be modified or deleted```.
+
+You will need to disable Windows **Secure Boot**, please read the *Disclaimer* part.
 
 ### Donate
 
