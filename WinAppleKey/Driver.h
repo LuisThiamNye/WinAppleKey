@@ -38,15 +38,20 @@ extern "C" {
 
 	extern DWORD g_dwSwapAltCmd;
 	extern DWORD g_dwSwapFnCtrl;
-
+	extern DWORD g_dwEjectScanCode;
+	// see https://gist.github.com/ekaitz-zarraga/2b25b94b711684ba4e969e5a5723969b
+	// https://usb.org/sites/default/files/hut1_21.pdf
+	// codes 74 and above appear to be useless
 	enum HidCodes
 	{
+		// Key codes
 		HidKeyNone = 0x0, // No key pressed
 		HidKeyErrOvf = 0x1, //  Keyboard Error Roll Over - used for all slots if too many keys are pressed
 		HidKeyB = 0x5,
 		HidKeyP = 0x13,
 		HidKeyS = 0x16,
 		HidKeyT = 0x17,
+		HidCapsLock = 0x39,
 		HidF1 = 0x3a,
 		HidF2 = 0x3b,
 		HidF3 = 0x3c,
@@ -85,14 +90,16 @@ extern "C" {
 		HidScrLck = 0x47,
 		HidPauseBreak = 0x48,
 		HidInsert = 0x49,
-		HidLCtrlMask = 0x1,
+
+		// Modifier keys
+		HidLCtrlMask = 0x1, // 0
 		HidRCtrlMask = 0x10,
-		HidLAltMask = 0x4,
+		HidLAltMask = 0x4, // 2
 		HidRAltMask = 0x40,
-		HidLCmdMask = 0x8,
+		HidLCmdMask = 0x8, // 3
 		HidRCmdMask = 0x80,
-		HidLShiftMask = 0x2,
-		HidRShiftMask = 0x20
+		HidLShiftMask = 0x2, // 1
+		HidRShiftMask = 0x20,
 	};
 
 	// Device extension structure

@@ -14,63 +14,114 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 	BYTE* pSpecialKey = &buf[8];
 
 	// SwapFnCtrl mode
-	if (g_dwSwapFnCtrl)
-	{
-		// Physical LCtrl pressed
-		if (*pModifier & 0x1)
-		{
-			if(!*pKey1) // And is it pressed alone?
-				g_FakeFnActive = TRUE;
+	//if (g_dwSwapFnCtrl)
+	//{
+	//	// Physical LCtrl pressed
+	//	if (*pModifier & HidLCtrlMask)
+	//	{
+	//		if(!*pKey1) // And is it pressed alone?
+	//			g_FakeFnActive = TRUE;
 
-			*pModifier &= ~HidLCtrlMask; // Clear LCtrl modifier
-		}
-		else // Physical LCtrl not pressed
-		{
-			if (!*pKey1) // Only unset g_FakeFnActive when there is no other key still being pressed
-				g_FakeFnActive = FALSE;
-		}
+	//		*pModifier &= ~HidLCtrlMask; // Clear LCtrl modifier
+	//	}
+	//	else // Physical LCtrl not pressed
+	//	{
+	//		if (!*pKey1) // Only unset g_FakeFnActive when there is no other key still being pressed
+	//			g_FakeFnActive = FALSE;
+	//	}
 
-		// Physical Fn pressed?
-		if (*pSpecialKey & 0x2)
-			*pModifier |= HidLCtrlMask; // Set LCtrl modifier
-		else
-			*pModifier &= ~HidLCtrlMask; // Clear LCtrl modifier
-	}
-	else // Not SwapFnCtrl mode
-		g_FakeFnActive = *pSpecialKey & 0x2; // Set FakeFnActive state based on physical Fn key state
+	//	// Physical Fn pressed?
+	//	if (*pSpecialKey & 0x2)
+	//		*pModifier |= HidLCtrlMask; // Set LCtrl modifier
+	//	else
+	//		*pModifier &= ~HidLCtrlMask; // Clear LCtrl modifier
+	//}
+	//else // Not SwapFnCtrl mode
+	g_FakeFnActive = *pSpecialKey & 0x2; // Set FakeFnActive state based on physical Fn key state
 
 	// Eject Pressed?
-	if (*pSpecialKey & 0x1)
-		*pKey1 = HidDel; // Set Del key
+	if (*pSpecialKey & 0x1 && g_dwEjectScanCode <= 0xff)
+		*pKey1 = g_dwEjectScanCode;
 
 	*pSpecialKey = 0; //Clear special key
 
 	// Optionally process optional Alt-Cmd swap
-	if (g_dwSwapAltCmd)
-	{
-		if (*pModifier & HidLAltMask)
+	//if (g_dwSwapAltCmd)
+	//{
+	//	if (*pModifier & HidLAltMask)
+	//	{
+	//		*pModifier &= ~HidLAltMask;
+	//		*pModifier |= HidLCmdMask;
+	//	}
+	//	else if (*pModifier & HidLCmdMask)
+	//	{
+	//		*pModifier &= ~HidLCmdMask;
+	//		*pModifier |= HidLAltMask;
+	//	}
+
+	//	if (*pModifier & HidRAltMask)
+	//	{
+	//		*pModifier &= ~HidRAltMask;
+	//		*pModifier |= HidRCmdMask;
+	//	}
+	//	else if (*pModifier & HidRCmdMask)
+	//	{
+	//		*pModifier &= ~HidRCmdMask;
+	//		*pModifier |= HidRAltMask;
+	//	}
+	//}
+
+	if (!(*pModifier & HidLCtrlMask && *pModifier & HidLCmdMask)) {
+		if (*pModifier & HidLCtrlMask)
 		{
-			*pModifier &= ~HidLAltMask;
+			*pModifier &= ~HidLCtrlMask;
 			*pModifier |= HidLCmdMask;
 		}
 		else if (*pModifier & HidLCmdMask)
 		{
 			*pModifier &= ~HidLCmdMask;
-			*pModifier |= HidLAltMask;
-		}
-
-		if (*pModifier & HidRAltMask)
-		{
-			*pModifier &= ~HidRAltMask;
-			*pModifier |= HidRCmdMask;
-		}
-		else if (*pModifier & HidRCmdMask)
-		{
-			*pModifier &= ~HidRCmdMask;
-			*pModifier |= HidRAltMask;
+			*pModifier |= HidLCtrlMask;
 		}
 	}
 
+    if (*pModifier & HidRCmdMask)
+	{
+		*pModifier &= ~HidRCmdMask;
+		*pModifier |= HidLCtrlMask;
+	}
+	if (!g_FakeFnActive) {
+		if (*pKey1 == HidCapsLock)
+		{
+			*pKey1 = HidKeyNone;
+			*pModifier |= HidRCtrlMask;
+		}
+		else if (*pKey2 == HidCapsLock)
+		{
+			*pKey2 = HidKeyNone;
+			*pModifier |= HidRCtrlMask;
+		}
+		else if (*pKey3 == HidCapsLock)
+		{
+			*pKey3 = HidKeyNone;
+			*pModifier |= HidRCtrlMask;
+		}
+		else if (*pKey4 == HidCapsLock)
+		{
+			*pKey4 = HidKeyNone;
+			*pModifier |= HidRCtrlMask;
+		}
+		else if (*pKey5 == HidCapsLock)
+		{
+			*pKey5 = HidKeyNone;
+			*pModifier |= HidRCtrlMask;
+		}
+		else if (*pKey6 == HidCapsLock)
+		{
+			*pKey6 = HidKeyNone;
+			*pModifier |= HidRCtrlMask;
+		}
+	}
+	
 	// Process FakeFn+[key] combination 
 	if (g_FakeFnActive && (*pKey1 || *pModifier))
 	{
@@ -81,6 +132,7 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 		case HidUp: *pKey1 = HidPgUp; break;
 		case HidDown: *pKey1 = HidPgDown; break;
 		case HidEnter: *pKey1 = HidInsert; break;
+		case HidCapsLock: *pKey1 = HidCapsLock; break;
 		case HidF1: *pKey1 = HidF13; break;
 		case HidF2: *pKey1 = HidF14; break;
 		case HidF3: *pKey1 = HidF15; break;
@@ -95,7 +147,7 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 		case HidF12: *pKey1 = HidF24; break;
 		case HidKeyP: *pKey1 = HidPrtScr; break;
 		case HidKeyB: *pKey1 = HidPauseBreak; break;
-		case HidKeyS: *pKey1 = HidScrLck; break;
+		//case HidKeyS: *pKey1 = HidScrLck; break;
 		default:
 			if (*pModifier & HidLCtrlMask) // Map Fn+LCtrl to RCtrl
 			{
