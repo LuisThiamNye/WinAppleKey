@@ -41,7 +41,7 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 
 	// Eject Pressed?
 	if (*pSpecialKey & 0x1 && g_dwEjectScanCode <= 0xff)
-		*pKey1 = g_dwEjectScanCode;
+		*pKey6 = g_dwEjectScanCode; // Avoid overriding key like caps lock by using last (6th) slot
 
 	*pSpecialKey = 0; //Clear special key
 
