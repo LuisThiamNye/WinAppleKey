@@ -41,86 +41,91 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 
 	// Eject Pressed?
 	if (*pSpecialKey & 0x1 && g_dwEjectScanCode <= 0xff)
-		*pKey6 = g_dwEjectScanCode; // Avoid overriding key like caps lock by using last (6th) slot
+		*pKey6 = HidDel; // Avoid overriding key like caps lock by using last (6th) slot
 
 	*pSpecialKey = 0; //Clear special key
 
 	// Optionally process optional Alt-Cmd swap
 	//if (g_dwSwapAltCmd)
 	//{
-	//	if (*pModifier & HidLAltMask)
+	if (*pModifier & HidLAltMask)
+	{
+		*pModifier &= ~HidLAltMask;
+		*pModifier |= HidLCmdMask;
+	}
+	else if (*pModifier & HidLCmdMask)
+	{
+		*pModifier &= ~HidLCmdMask;
+		*pModifier |= HidLAltMask;
+	}
+
+	if (*pModifier & HidRAltMask)
+	{
+		*pModifier &= ~HidRAltMask;
+		//*pModifier |= HidRCmdMask;
+		*pModifier |= HidRCtrlMask;
+	}
+	else if (*pModifier & HidRCmdMask)
+	{
+		*pModifier &= ~HidRCmdMask;
+		*pModifier |= HidRAltMask;
+	}
+	//}
+
+	// Swap LCtrl and LCmd
+	//if (!(*pModifier & HidLCtrlMask && *pModifier & HidLCmdMask)) {
+	//	if (*pModifier & HidLCtrlMask)
 	//	{
-	//		*pModifier &= ~HidLAltMask;
+	//		*pModifier &= ~HidLCtrlMask;
 	//		*pModifier |= HidLCmdMask;
 	//	}
 	//	else if (*pModifier & HidLCmdMask)
 	//	{
 	//		*pModifier &= ~HidLCmdMask;
-	//		*pModifier |= HidLAltMask;
-	//	}
-
-	//	if (*pModifier & HidRAltMask)
-	//	{
-	//		*pModifier &= ~HidRAltMask;
-	//		*pModifier |= HidRCmdMask;
-	//	}
-	//	else if (*pModifier & HidRCmdMask)
-	//	{
-	//		*pModifier &= ~HidRCmdMask;
-	//		*pModifier |= HidRAltMask;
+	//		*pModifier |= HidLCtrlMask;
 	//	}
 	//}
 
-	if (!(*pModifier & HidLCtrlMask && *pModifier & HidLCmdMask)) {
-		if (*pModifier & HidLCtrlMask)
-		{
-			*pModifier &= ~HidLCtrlMask;
-			*pModifier |= HidLCmdMask;
-		}
-		else if (*pModifier & HidLCmdMask)
-		{
-			*pModifier &= ~HidLCmdMask;
-			*pModifier |= HidLCtrlMask;
-		}
-	}
+	// RCmd -> LCtrl
+    //if (*pModifier & HidRCmdMask)
+	//{
+	//	*pModifier &= ~HidRCmdMask;
+	//	*pModifier |= HidLCtrlMask;
+	//}
 
-    if (*pModifier & HidRCmdMask)
-	{
-		*pModifier &= ~HidRCmdMask;
-		*pModifier |= HidLCtrlMask;
-	}
-	if (!g_FakeFnActive) {
-		if (*pKey1 == HidCapsLock)
-		{
-			*pKey1 = HidKeyNone;
-			*pModifier |= HidRCtrlMask;
-		}
-		else if (*pKey2 == HidCapsLock)
-		{
-			*pKey2 = HidKeyNone;
-			*pModifier |= HidRCtrlMask;
-		}
-		else if (*pKey3 == HidCapsLock)
-		{
-			*pKey3 = HidKeyNone;
-			*pModifier |= HidRCtrlMask;
-		}
-		else if (*pKey4 == HidCapsLock)
-		{
-			*pKey4 = HidKeyNone;
-			*pModifier |= HidRCtrlMask;
-		}
-		else if (*pKey5 == HidCapsLock)
-		{
-			*pKey5 = HidKeyNone;
-			*pModifier |= HidRCtrlMask;
-		}
-		else if (*pKey6 == HidCapsLock)
-		{
-			*pKey6 = HidKeyNone;
-			*pModifier |= HidRCtrlMask;
-		}
-	}
+	// Caps -> RCtrl
+	//if (!g_FakeFnActive) {
+	//	if (*pKey1 == HidCapsLock)
+	//	{
+	//		*pKey1 = HidKeyNone;
+	//		*pModifier |= HidRCtrlMask;
+	//	}
+	//	else if (*pKey2 == HidCapsLock)
+	//	{
+	//		*pKey2 = HidKeyNone;
+	//		*pModifier |= HidRCtrlMask;
+	//	}
+	//	else if (*pKey3 == HidCapsLock)
+	//	{
+	//		*pKey3 = HidKeyNone;
+	//		*pModifier |= HidRCtrlMask;
+	//	}
+	//	else if (*pKey4 == HidCapsLock)
+	//	{
+	//		*pKey4 = HidKeyNone;
+	//		*pModifier |= HidRCtrlMask;
+	//	}
+	//	else if (*pKey5 == HidCapsLock)
+	//	{
+	//		*pKey5 = HidKeyNone;
+	//		*pModifier |= HidRCtrlMask;
+	//	}
+	//	else if (*pKey6 == HidCapsLock)
+	//	{
+	//		*pKey6 = HidKeyNone;
+	//		*pModifier |= HidRCtrlMask;
+	//	}
+	//}
 	
 	// Process FakeFn+[key] combination 
 	if (g_FakeFnActive && (*pKey1 || *pModifier))
@@ -149,13 +154,13 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 		case HidKeyB: *pKey1 = HidPauseBreak; break;
 		//case HidKeyS: *pKey1 = HidScrLck; break;
 		default:
-			if (*pModifier & HidLCtrlMask) // Map Fn+LCtrl to RCtrl
-			{
-				*pModifier &= ~HidLCtrlMask; // Clear LCtrl
-				*pModifier |= HidRCtrlMask; // Set RCtrl
-			}
-			else
-				RtlZeroMemory(buf, size); // Ignore all other Fn+[key] combinations
+			//if (*pModifier & HidLCtrlMask) // Map Fn+LCtrl to RCtrl
+			//{
+			//	*pModifier &= ~HidLCtrlMask; // Clear LCtrl
+			//	*pModifier |= HidRCtrlMask; // Set RCtrl
+			//}
+			//else
+			RtlZeroMemory(buf, size); // Ignore all other Fn+[key] combinations
 			break;
 		}
 	}
