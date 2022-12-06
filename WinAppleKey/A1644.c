@@ -37,7 +37,19 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 	//		*pModifier &= ~HidLCtrlMask; // Clear LCtrl modifier
 	//}
 	//else // Not SwapFnCtrl mode
+	BOOLEAN prev_fn = g_FakeFnActive;
 	g_FakeFnActive = *pSpecialKey & 0x2; // Set FakeFnActive state based on physical Fn key state
+
+	// fn released - prevent immediate accidental keystokes by clearing the buffer
+	if ((prev_fn != g_FakeFnActive) && !g_FakeFnActive) {
+		*pKey1 = 0;
+		*pKey2 = 0;
+		*pKey3 = 0;
+		*pKey4 = 0;
+		*pKey5 = 0;
+		*pKey6 = 0;
+		*pSpecialKey = 0;
+	}
 
 	// Eject Pressed?
 	if (*pSpecialKey & 0x1 && g_dwEjectScanCode <= 0xff)
@@ -45,9 +57,8 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 
 	*pSpecialKey = 0; //Clear special key
 
-	// Optionally process optional Alt-Cmd swap
-	//if (g_dwSwapAltCmd)
-	//{
+	// Alt-Cmd swap
+
 	if (*pModifier & HidLAltMask)
 	{
 		*pModifier &= ~HidLAltMask;
@@ -62,7 +73,6 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 	if (*pModifier & HidRAltMask)
 	{
 		*pModifier &= ~HidRAltMask;
-		//*pModifier |= HidRCmdMask;
 		*pModifier |= HidRCtrlMask;
 	}
 	else if (*pModifier & HidRCmdMask)
@@ -70,62 +80,6 @@ void ProcessA1644Buffer(BYTE* buf, ULONG size)
 		*pModifier &= ~HidRCmdMask;
 		*pModifier |= HidRAltMask;
 	}
-	//}
-
-	// Swap LCtrl and LCmd
-	//if (!(*pModifier & HidLCtrlMask && *pModifier & HidLCmdMask)) {
-	//	if (*pModifier & HidLCtrlMask)
-	//	{
-	//		*pModifier &= ~HidLCtrlMask;
-	//		*pModifier |= HidLCmdMask;
-	//	}
-	//	else if (*pModifier & HidLCmdMask)
-	//	{
-	//		*pModifier &= ~HidLCmdMask;
-	//		*pModifier |= HidLCtrlMask;
-	//	}
-	//}
-
-	// RCmd -> LCtrl
-    //if (*pModifier & HidRCmdMask)
-	//{
-	//	*pModifier &= ~HidRCmdMask;
-	//	*pModifier |= HidLCtrlMask;
-	//}
-
-	// Caps -> RCtrl
-	//if (!g_FakeFnActive) {
-	//	if (*pKey1 == HidCapsLock)
-	//	{
-	//		*pKey1 = HidKeyNone;
-	//		*pModifier |= HidRCtrlMask;
-	//	}
-	//	else if (*pKey2 == HidCapsLock)
-	//	{
-	//		*pKey2 = HidKeyNone;
-	//		*pModifier |= HidRCtrlMask;
-	//	}
-	//	else if (*pKey3 == HidCapsLock)
-	//	{
-	//		*pKey3 = HidKeyNone;
-	//		*pModifier |= HidRCtrlMask;
-	//	}
-	//	else if (*pKey4 == HidCapsLock)
-	//	{
-	//		*pKey4 = HidKeyNone;
-	//		*pModifier |= HidRCtrlMask;
-	//	}
-	//	else if (*pKey5 == HidCapsLock)
-	//	{
-	//		*pKey5 = HidKeyNone;
-	//		*pModifier |= HidRCtrlMask;
-	//	}
-	//	else if (*pKey6 == HidCapsLock)
-	//	{
-	//		*pKey6 = HidKeyNone;
-	//		*pModifier |= HidRCtrlMask;
-	//	}
-	//}
 	
 	// Process FakeFn+[key] combination 
 	if (g_FakeFnActive && (*pKey1 || *pModifier))
